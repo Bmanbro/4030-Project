@@ -1,5 +1,7 @@
-(() => {
-  d3.csv("./Foodpanda Analysis Dataset.csv").then(function(dataset) {
-    console.log(dataset)
-  })
-})
+d3.csv("data.csv").then(function(data) {
+  console.log(data)
+
+  const cities = {
+    { name: "Peshawar", coords: }
+  }
+});
