@@ -1,5 +1,8 @@
 let allData;
-let reducedData; // NEW → downsampled dataset
+let reducedData;
+
+window.allScatterData = reducedData;
+window.drawScatter = drawScatter;
 
 d3.csv('data.csv').then(dataset => {
   allData = dataset.map(d => ({
@@ -8,7 +11,6 @@ d3.csv('data.csv').then(dataset => {
     loyalty_points: +d.loyalty_points
   }));
 
-  // ↓ NEW: Downsample entire dataset once globally
   reducedData = allData.filter(() => Math.random() < 0.25);
 
   drawScatter(reducedData);
@@ -24,6 +26,20 @@ d3.csv('data.csv').then(dataset => {
 
     drawScatter(filtered, color);
   };
+
+  window.filterScatterByCategory = (category, color) => {
+
+    // Filter the reduced dataset first
+    let filtered = reducedData.filter(d => d.category === category);
+
+    // If no results because of downsampling, fall back to all data
+    if (filtered.length === 0) {
+      filtered = allData.filter(d => d.category === category);
+    }
+
+    drawScatter(filtered, color);
+  };
+
 });
 
 function drawScatter(data, overrideColor = null) {
