@@ -4,42 +4,39 @@ let reducedData;
 window.allScatterData = reducedData;
 window.drawScatter = drawScatter;
 
+// Simple seeded random generator
+function seededRandom(seed) {
+  let x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+}
+
 d3.csv('data.csv').then(dataset => {
-  allData = dataset.map(d => ({
+  allData = dataset.map((d, i) => ({
     ...d,
     order_frequency: +d.order_frequency,
-    loyalty_points: +d.loyalty_points
+    loyalty_points: +d.loyalty_points,
+    _seed: i // unique seed per row
   }));
 
-  reducedData = allData.filter(() => Math.random() < 0.25);
+  reducedData = allData.filter(() => Math.random() < 1.0);
 
   drawScatter(reducedData);
 
-  // Modified filter function
   window.filterScatter = (selectedCity, color) => {
     let filtered = reducedData.filter(d => d.city === selectedCity);
-
-    // Prevent 0-point output on small datasets
     if (filtered.length === 0) {
       filtered = allData.filter(d => d.city === selectedCity);
     }
-
     drawScatter(filtered, color);
   };
 
   window.filterScatterByCategory = (category, color) => {
-
-    // Filter the reduced dataset first
     let filtered = reducedData.filter(d => d.category === category);
-
-    // If no results because of downsampling, fall back to all data
     if (filtered.length === 0) {
       filtered = allData.filter(d => d.category === category);
     }
-
     drawScatter(filtered, color);
   };
-
 });
 
 function drawScatter(data, overrideColor = null) {
@@ -54,21 +51,20 @@ function drawScatter(data, overrideColor = null) {
     .attr("height", height);
 
   const xScale = d3.scaleLinear()
-    .domain(d3.extent(allData, d => d.order_frequency))
+    .domain(d3.extent(allData, d => d.loyalty_points))
     .nice()
     .range([margin.left, width - margin.right]);
 
   const yScale = d3.scaleLinear()
-    .domain(d3.extent(allData, d => d.loyalty_points))
+    .domain(d3.extent(allData, d => d.order_frequency))
+    .nice()
     .range([height - margin.bottom, margin.top]);
 
-  // Color scale
-  const cities = Array.from(new Set(allData.map(d => d.city)));
-  const cityColor = d3.scaleOrdinal()
-    .domain(cities)
+  const restaurants = Array.from(new Set(allData.map(d => d.restaurant_name)));
+  const restaurantColor = d3.scaleOrdinal()
+    .domain(restaurants)
     .range(d3.schemeCategory10);
 
-  // Axes
   svg.append("g")
     .attr("transform", `translate(0, ${height - margin.bottom})`)
     .call(d3.axisBottom(xScale));
@@ -77,28 +73,36 @@ function drawScatter(data, overrideColor = null) {
     .attr("transform", `translate(${margin.left},0)`)
     .call(d3.axisLeft(yScale));
 
-  // Axis labels
   svg.append("text")
     .attr("x", width / 2)
     .attr("y", height - 20)
     .attr("text-anchor", "middle")
-    .text("Order Frequency");
+    .text("Loyalty Points");
 
   svg.append("text")
     .attr("transform", "rotate(-90)")
     .attr("x", -height / 2)
     .attr("y", 20)
     .attr("text-anchor", "middle")
-    .text("Loyalty Points");
+    .text("Order Frequency");
 
-  // Plot Points
+  // Add seeded random offset within bounding box
+  const offsetScale = 8; // max pixel offset
+  const nodes = data.map(d => {
+    const offsetX = (seededRandom(d._seed + 1) - 0.5) * offsetScale;
+    const offsetY = (seededRandom(d._seed + 2) - 0.5) * offsetScale;
+    const x = Math.max(margin.left, Math.min(width - margin.right, xScale(d.loyalty_points) + offsetX));
+    const y = Math.max(margin.top, Math.min(height - margin.bottom, yScale(d.order_frequency) + offsetY));
+    return { ...d, x, y };
+  });
+
   svg.selectAll("circle")
-    .data(data)
+    .data(nodes)
     .enter()
     .append("circle")
-    .attr("cx", d => xScale(d.order_frequency))
-    .attr("cy", d => yScale(d.loyalty_points))
-    .attr("r", 6)
-    .attr("fill", d => overrideColor ? overrideColor : cityColor(d.city))
+    .attr("r", 4)
+    .attr("cx", d => d.x)
+    .attr("cy", d => d.y)
+    .attr("fill", d => overrideColor ? overrideColor : restaurantColor(d.restaurant_name))
     .attr("opacity", 0.8);
 }
