@@ -46,13 +46,16 @@ d3.csv('data.csv').then(dataset => {
 
 
 function applyCombinedFilters() {
-  let filtered = allData;
 
-  if (activeRestaurant) {
-    filtered = filtered.filter(d => d.restaurant_name === activeRestaurant);
-  }
-  if (activeCity) {
-    filtered = filtered.filter(d => d.city === activeCity);
+  let filtered = allData.map(d => ({ ...d, _dim: false }));
+
+
+  if (activeRestaurant || activeCity) {
+    filtered = filtered.map(d => {
+      const matchRestaurant = !activeRestaurant || d.restaurant_name === activeRestaurant;
+      const matchCity = !activeCity || d.city === activeCity;
+      return { ...d, _dim: !(matchRestaurant && matchCity) };
+    });
   }
 
   drawScatter(filtered);
@@ -123,5 +126,5 @@ function drawScatter(data, overrideColor = null) {
     .attr("cx", d => d.x)
     .attr("cy", d => d.y)
     .attr("fill", d => overrideColor ? overrideColor : restaurantColor(d.restaurant_name))
-    .attr("opacity", 0.8);
+    .attr("opacity", d => d._dim ? 0.15 : 0.9);
 }
