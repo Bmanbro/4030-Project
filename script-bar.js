@@ -1,7 +1,7 @@
 d3.csv('data.csv').then(dataset => {
 
-  const width = 600;
-  const height = 500;
+  const width = 1700;
+  const height = 300;
   const margin = { top: 40, right: 30, bottom: 70, left: 85 };
 
   const svg = d3.select("#bar")

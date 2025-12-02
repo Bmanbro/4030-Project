@@ -40,7 +40,7 @@ d3.csv('data.csv').then(dataset => {
 });
 
 function drawScatter(data, overrideColor = null) {
-  const width = 1220;
+  const width = 1000;
   const height = 550;
   const margin = { top: 30, right: 30, bottom: 60, left: 60 };
 
