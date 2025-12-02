@@ -49,9 +49,9 @@ d3.csv('data.csv').then(dataset => {
 
   const projection = d3.geoMercator()
     .fitExtent(
-    [ [margins + 64, margins-10], [width - margins, height - margins+20] ], // comfortable margins
-    cityFeatures
-  );
+      [[margins + 64, margins - 10], [width - margins, height - margins + 20]], // comfortable margins
+      cityFeatures
+    );
 
   // background underlay of pakistan
   const geoPath = d3.geoPath().projection(projection);
@@ -150,7 +150,7 @@ d3.csv('data.csv').then(dataset => {
     simulation
       .force('restaurantX', d3.forceX(d => d.x + Math.cos(restaurantAngles[d.restaurant_name])).strength(restaurantForce))
       .force('restaurantY', d3.forceY(d => d.y + Math.sin(restaurantAngles[d.restaurant_name])).strength(restaurantForce))
-    
+
   }
 
   // city points
@@ -163,7 +163,12 @@ d3.csv('data.csv').then(dataset => {
     .attr('cy', c => cityCoords[c].y)
     .attr('r', 16)
     .attr('fill', d => "#222222")
-    .attr('opacity', 0.4);
+    .attr('opacity', 0.4)
+    .style("cursor", "pointer")
+    .on("click", (event, city) => {
+      console.log("Clicked map:", city)
+      filterScatterCity(city);
+    });
 
   // city labels
   fgLayer.selectAll('text.city-label')
@@ -181,6 +186,10 @@ d3.csv('data.csv').then(dataset => {
     .style('fill', '#222222')
     .style('stroke', '#eeeeee')
     .style('stroke-width', '3px')
-    .style('paint-order', 'stroke');
+    .style('paint-order', 'stroke')
+    .on("click", (event, city) => {
+      console.log("CITY CLICK:", city);
+      filterScatterCity(city);
+    });
 
 });

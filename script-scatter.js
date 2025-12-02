@@ -1,6 +1,9 @@
 let allData;
 let reducedData;
 
+let activeRestaurant = null;
+let activeCity = null;
+
 window.allScatterData = reducedData;
 window.drawScatter = drawScatter;
 
@@ -22,22 +25,38 @@ d3.csv('data.csv').then(dataset => {
 
   drawScatter(reducedData);
 
-  window.filterScatter = (selectedCity, color) => {
-    let filtered = reducedData.filter(d => d.city === selectedCity);
-    if (filtered.length === 0) {
-      filtered = allData.filter(d => d.city === selectedCity);
+  window.filterScatterCity = (selectedCity) => {
+    if (activeCity === selectedCity) {
+      activeCity = null;
+    } else {
+      activeCity = selectedCity;
     }
-    drawScatter(filtered, color);
+    applyCombinedFilters();
   };
 
-  window.filterScatterByCategory = (category, color) => {
-    let filtered = reducedData.filter(d => d.category === category);
-    if (filtered.length === 0) {
-      filtered = allData.filter(d => d.category === category);
+  window.filterScatterRestaurant = (restaurant) => {
+    if (activeRestaurant === restaurant) {
+      activeRestaurant = null;
+    } else {
+      activeRestaurant = restaurant;
     }
-    drawScatter(filtered, color);
+    applyCombinedFilters();
   };
 });
+
+
+function applyCombinedFilters() {
+  let filtered = allData;
+
+  if (activeRestaurant) {
+    filtered = filtered.filter(d => d.restaurant_name === activeRestaurant);
+  }
+  if (activeCity) {
+    filtered = filtered.filter(d => d.city === activeCity);
+  }
+
+  drawScatter(filtered);
+}
 
 function drawScatter(data, overrideColor = null) {
   const width = 1000;
@@ -87,7 +106,7 @@ function drawScatter(data, overrideColor = null) {
     .text("Order Frequency");
 
   // Add seeded random offset within bounding box
-  const offsetScale = 8; // max pixel offset
+  const offsetScale = 8; 
   const nodes = data.map(d => {
     const offsetX = (seededRandom(d._seed + 1) - 0.5) * offsetScale;
     const offsetY = (seededRandom(d._seed + 2) - 0.5) * offsetScale;

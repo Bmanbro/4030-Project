@@ -61,12 +61,27 @@ d3.csv('data.csv').then(dataset => {
     .keys(restaurants);
 
   const stackedData = stackGen(cityData);
- 
+
   svg.selectAll("g.stacks")
     .data(stackedData)
     .enter()
     .append("g")
     .attr("fill", d => colorScale(d.key))
+    .on("click", (event, layer) => {
+      const restaurant = layer.key;
+      console.log("CLICKED RESTAURANT TYPE:", restaurant);
+
+      if (window.filterScatterRestaurant) {
+        filterScatterRestaurant(restaurant);
+      }
+
+      if (window.highlightRestaurantOnMap) {
+        highlightRestaurantOnMap(restaurant);
+      }
+
+      bars.classed("bar-selected", d => d.key === activeRestaurant)
+        .classed("bar-unselected", d => activeRestaurant && d.key !== activeRestaurant);
+    })
     .selectAll("rect")
     .data(d => d)
     .enter()
@@ -75,7 +90,7 @@ d3.csv('data.csv').then(dataset => {
     .attr("width", d => xScale(d[1]) - xScale(d[0]))
     .attr("y", d => yScale(d.data.city))
     .attr("height", yScale.bandwidth())
-    .style("cursor", "pointer")
+    .style("cursor", "pointer");
 
   const cityIndex = 4;
   // this is the last index, of Islamabad, which will end up
@@ -87,7 +102,7 @@ d3.csv('data.csv').then(dataset => {
     if (d) {
       svg.append("text")
         .text(layer.key)
-        .attr("x", xScale(d[0]) + 6 )
+        .attr("x", xScale(d[0]) + 6)
         .attr("y", yScale(d.data.city) - 6)
         .attr("text-anchor", "left")
         .attr("font-size", "16px")
