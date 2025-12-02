@@ -43,9 +43,9 @@ d3.csv('data.csv').then(dataset => {
 });
 
 function drawScatter(data, overrideColor = null) {
-  const width = 600;
-  const height = 600;
-  const margin = { top: 40, right: 40, bottom: 70, left: 70 };
+  const width = 1220;
+  const height = 550;
+  const margin = { top: 30, right: 30, bottom: 60, left: 60 };
 
   d3.select("#scatter").selectAll("*").remove();
 
