@@ -2,7 +2,7 @@ d3.csv('data.csv').then(dataset => {
 
   const width = 600;
   const height = 500;
-  const margin = { top: 40, right: 30, bottom: 70, left: 70 };
+  const margin = { top: 40, right: 30, bottom: 70, left: 85 };
 
   const svg = d3.select("#bar")
     .attr("width", width)
@@ -45,21 +45,23 @@ d3.csv('data.csv').then(dataset => {
   svg.append("text")
     .attr("x", width / 2)
     .attr("y", height - 20)
+    .attr("font-size", "16px")
     .attr("text-anchor", "middle")
-    .text("City");
+    .text("Total Orders");
 
   svg.append("text")
     .attr("transform", "rotate(-90)")
     .attr("x", -height / 2)
     .attr("y", 20)
+    .attr("font-size", "16px")
     .attr("text-anchor", "middle")
-    .text("Total Orders");
+    .text("City");
 
   const stackGen = d3.stack()
     .keys(restaurants);
 
   const stackedData = stackGen(cityData);
-
+ 
   svg.selectAll("g.stacks")
     .data(stackedData)
     .enter()
@@ -69,14 +71,29 @@ d3.csv('data.csv').then(dataset => {
     .data(d => d)
     .enter()
     .append("rect")
-    .attr("x", d => xScale(d[0]))        // start of stack
-    .attr("width", d => xScale(d[1]) - xScale(d[0])) // positive width
-    .attr("y", d => yScale(d.data.city)) // y position
-    .attr("height", yScale.bandwidth())  // full band
+    .attr("x", d => xScale(d[0]))
+    .attr("width", d => xScale(d[1]) - xScale(d[0]))
+    .attr("y", d => yScale(d.data.city))
+    .attr("height", yScale.bandwidth())
     .style("cursor", "pointer")
-    //.on("click", (event, d) => {
-    //  // d.data.city is the city
-    //  window.filterScatterByCategory(d.data.city, colorScale(d.data.restaurant_name));
-    //});
+
+  const cityIndex = 4;
+  // this is the last index, of Islamabad, which will end up
+  // at the top of the chart.
+
+  // Find the top stack for that city
+  stackedData.forEach(layer => {
+    const d = layer[cityIndex];
+    if (d) {
+      svg.append("text")
+        .text(layer.key)
+        .attr("x", xScale(d[0]) + 6 )
+        .attr("y", yScale(d.data.city) - 6)
+        .attr("text-anchor", "left")
+        .attr("font-size", "16px")
+        .attr("font-weight", "600")
+        .attr("fill", colorScale(layer.key));
+    }
+  });
 
 });
