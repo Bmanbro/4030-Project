@@ -1,6 +1,12 @@
+
+window.activeRestaurant = null;
+window.activeCity = null;
+
+
+
 d3.csv('data.csv').then(dataset => {
 
-  const width = 1700;
+  const width = 1800;
   const height = 320;
   const margin = { top: 40, right: 30, bottom: 70, left: 85 };
 
@@ -69,14 +75,25 @@ d3.csv('data.csv').then(dataset => {
     .attr("fill", d => colorScale(d.key))
     .on("click", (event, layer) => {
       const restaurant = layer.key;
-      console.log("CLICKED RESTAURANT TYPE:", restaurant);
 
-      if (window.filterScatterRestaurant) {
-        filterScatterRestaurant(restaurant);
+      //if (window.activeCity === selectedCity) {
+      //  window.activeCity = null;
+      //} else {
+      //  window.activeCity = selectedCity;
+      //} 
+
+      if (window.activeRestaurant === restaurant) {
+        window.activeRestaurant = null;
+      } else {
+        window.activeRestaurant = restaurant;
       }
 
-      if (window.highlightRestaurantOnMap) {
-        highlightRestaurantOnMap(restaurant);
+      if (window.filterScatterRestaurant) {
+        filterScatterRestaurant();
+      }
+
+      if (window.filterTimelineRestaurant) {
+        filterTimelineRestaurant();
       }
 
       bars.classed("bar-selected", d => d.key === activeRestaurant)
@@ -96,7 +113,6 @@ d3.csv('data.csv').then(dataset => {
   // this is the last index, of Islamabad, which will end up
   // at the top of the chart.
 
-  // Find the top stack for that city
   stackedData.forEach(layer => {
     const d = layer[cityIndex];
     if (d) {

@@ -1,11 +1,5 @@
 let allData;
-let reducedData;
-
-let activeRestaurant = null;
-let activeCity = null;
-
-window.allScatterData = reducedData;
-window.drawScatter = drawScatter;
+//let reducedData;
 
 // Simple seeded random generator
 function seededRandom(seed) {
@@ -21,39 +15,28 @@ d3.csv('data.csv').then(dataset => {
     _seed: i // unique seed per row
   }));
 
-  reducedData = allData.filter(() => Math.random() < 1.0);
+  //reducedData = allData.filter(() => Math.random() < 1.0);
 
-  drawScatter(reducedData);
+  drawScatter(allData);
 
-  window.filterScatterCity = (selectedCity) => {
-    if (activeCity === selectedCity) {
-      activeCity = null;
-    } else {
-      activeCity = selectedCity;
-    }
-    applyCombinedFilters();
+  window.filterScatterCity = () => {
+    applyCombinedFiltersScatter();
   };
 
-  window.filterScatterRestaurant = (restaurant) => {
-    if (activeRestaurant === restaurant) {
-      activeRestaurant = null;
-    } else {
-      activeRestaurant = restaurant;
-    }
-    applyCombinedFilters();
+  window.filterScatterRestaurant = () => {
+    applyCombinedFiltersScatter();
   };
 });
 
 
-function applyCombinedFilters() {
-
+function applyCombinedFiltersScatter() {
   let filtered = allData.map(d => ({ ...d, _dim: false }));
 
 
-  if (activeRestaurant || activeCity) {
+  if (window.activeRestaurant || window.activeCity) {
     filtered = filtered.map(d => {
-      const matchRestaurant = !activeRestaurant || d.restaurant_name === activeRestaurant;
-      const matchCity = !activeCity || d.city === activeCity;
+      const matchRestaurant = !window.activeRestaurant || d.restaurant_name === window.activeRestaurant;
+      const matchCity = !window.activeCity || d.city === window.activeCity;
       return { ...d, _dim: !(matchRestaurant && matchCity) };
     });
   }
@@ -62,7 +45,7 @@ function applyCombinedFilters() {
 }
 
 function drawScatter(data, overrideColor = null) {
-  const width = 1000;
+  const width = 950;
   const height = 550;
   const margin = { top: 30, right: 30, bottom: 60, left: 60 };
 
@@ -128,3 +111,5 @@ function drawScatter(data, overrideColor = null) {
     .attr("fill", d => overrideColor ? overrideColor : restaurantColor(d.restaurant_name))
     .attr("opacity", d => d._dim ? 0.15 : 0.9);
 }
+
+window.drawScatter = drawScatter;
