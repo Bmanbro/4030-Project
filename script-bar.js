@@ -46,7 +46,37 @@ d3.csv('data.csv').then(dataset => {
 
   svg.append("g")
     .attr("transform", `translate(${margin.left},0)`)
-    .call(d3.axisLeft(yScale));
+    .call(d3.axisLeft(yScale))
+    .selectAll("text")
+    .style("cursor", "pointer")
+    .on("click", (event, city) => {
+      if (window.activeCity === city) {
+        window.activeCity = null;
+      } else {
+        window.activeCity = city;
+      }
+
+      // Apply filters
+      if (window.filterScatterCity) filterScatterCity();
+      if (window.filterTimelineCity) filterTimelineCity();
+
+      updateCityHighlight();
+    });
+
+  function updateCityHighlight() {
+    // Highlight axis labels
+    d3.select("#bar")
+      .selectAll("g > .tick text")
+      .classed("city-selected", d => d === window.activeCity)
+      .classed("city-unselected", d => window.activeCity && d !== window.activeCity);
+
+    // Dim or highlight the bars
+    d3.select("#bar")
+      .selectAll("rect")
+      .classed("city-dim", d => window.activeCity && d.data.city !== window.activeCity);
+  }
+
+
 
   svg.append("text")
     .attr("x", width / 2)
